@@ -1,39 +1,37 @@
-from django.contrib.auth import authenticate, login
+#from django.contrib.auth import authenticate, login
 from django.shortcuts import render,redirect
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+#from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.views.generic import CreateView, TemplateView, UpdateView
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import CustomUserCreationForm,CustomUserChangeForm
+from .models import CustomUser
 
-
-# Create your views here.
 def home_view(request):
     return render(request, template_name='home.html')
 
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('home')
-    else:
-        form = AuthenticationForm()
-    return render(request, template_name='login.html', context={'form':form})
+class DashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'protectedContent.html'
 
 
-def signin_view(request):
-    if request.method == 'POST':
-        form = UserCreationForm(data=request.POST)
+class RegisterView(CreateView):
+    form_class = CustomUserCreationForm
+    template_name = 'signin.html'
+    success_url = reverse_lazy('dashboard')
 
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = UserCreationForm()
-    return render(request, template_name='signin.html', context={'form':form})
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)  # Авто-вход после регистрации
+        return super().form_valid(form)
 
-def logout_confirm(request):
-    return render(request, template_name='logout.html')
+
+class ProfileView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    form_class = CustomUserChangeForm
+    template_name = 'profile.html'
+    success_url = reverse_lazy('dashboard')
+
+    def get_object(self):
+        return self.request.user  # Редактируем только текущего пользователя

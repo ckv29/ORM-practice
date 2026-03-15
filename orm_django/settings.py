@@ -120,4 +120,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-LOGOUT_REDIRECT_URL = 'home'
+AUTH_USER_MODEL = 'users.CustomUser'
+
+LOGIN_URL = 'login'  # Куда перенаправлять неавторизованных
+LOGIN_REDIRECT_URL = 'dashboard'  # Куда после успешного входа
+LOGOUT_REDIRECT_URL = 'login'  # Куда после выхода

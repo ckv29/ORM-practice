@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Панель управления</h2>
+<p>Привет, {{ user.username }}!</p>
+<p>Email: {{ user.email }}</p>
+<p>Возраст: {{ user_age }} лет</p>
+<p>О себе: {{ user.bio|default:"Не указано" }}</p>
+
+<a href="{% url 'profile' %}">Редактировать профиль</a> |
+<form action="{% url 'logout' %}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Выйти</button>
+</form>
+{% endblock %}
